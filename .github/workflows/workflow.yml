@@ -26,9 +26,12 @@ jobs:
           uses: 'azure/aci-deploy@v1'
           with:
             resource-group: mangobot
-            dns-name-label: mangobot
+            dns-name-label: mangobot-${{ github.sha }}
             image: mangobotregistry2.azurecr.io/mangobot:${{ github.sha }}
             registry-username: ${{ secrets.REGISTRY_USERNAME }}
             registry-password: ${{ secrets.REGISTRY_PASSWORD }}
-            name: mangobot-new
+            name: mangobot-aci
             location: 'east us'
+            cpu: 1
+            memory: 0.1
+            secure-environment-variables: ConnectionStrings__Cosmos=${{ secrets.COSMOS_CONNECTION_STRING }} Discord__Token=${{ secrets.DISCORD_TOKEN }}
