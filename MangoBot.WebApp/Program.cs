@@ -28,30 +28,20 @@ try
             contextOptions.UseCosmos(connectionString, databaseName: "MangoBot");
         }
     });
+    builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<MangoBot.Messaging.AssemblyMarker>());
     builder.Services.AddSingleton<IPublicHolidaysProvider, PublicHolidaysProvider>();
     builder.Services.AddSingleton<IDiscordClientProvider, DiscordClientProvider>();
     builder.Services.AddSingleton<IMessageSender, DiscordMessageSender>();
     
     builder.Services.AddHostedService<SchedulingService>();
+    builder.Services.AddHostedService<MessagingService>();
+    
     builder.Host.UseSerilog(log);
     builder.Logging.ClearProviders();
     builder.Logging.AddSerilog(log);
     
     var app = builder.Build();
-
-    // Configure the HTTP request pipeline.
-    // if (app.Environment.IsDevelopment())
-    // {
-    //     app.UseSwagger();
-    //     app.UseSwaggerUI();
-    // }
-
-    // app.UseHttpsRedirection();
-
-    // app.UseAuthorization();
-
-    // app.MapControllers();
-
+    
     app.Run();
 }
 catch (Exception ex)

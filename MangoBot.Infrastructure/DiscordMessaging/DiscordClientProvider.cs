@@ -20,6 +20,7 @@ public class DiscordClientProvider : IDiscordClientProvider
         this.client = new DiscordSocketClient(new DiscordSocketConfig
         {
             FormatUsersInBidirectionalUnicode = false,
+            GatewayIntents = GatewayIntents.AllUnprivileged | GatewayIntents.MessageContent,
         });
         this.client.Log += HandleDiscordLogEvent;
     }

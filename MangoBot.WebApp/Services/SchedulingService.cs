@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MangoBot.WebApp.Services;
 
-public class SchedulingService : IHostedService
+public class SchedulingService : BackgroundService
 {
     private readonly ILogger<SchedulingService> logger;
     private readonly IMessageSender messageSender;
@@ -27,82 +27,106 @@ public class SchedulingService : IHostedService
         this.publicHolidays = publicHolidays;
     }
     
-    public async Task StartAsync(CancellationToken cancellationToken)
+    private const int MaxExceptionsAllowed = 10;
+
+    protected override async Task ExecuteAsync(CancellationToken cancellationToken)
     {
         this.logger.LogInformation("Starting scheduling service");
 
+        var exceptionCount = 0;
+        
         while (!cancellationToken.IsCancellationRequested)
         {
-            this.logger.LogInformation("Running schedule check");
-
-            var nextCheckAt = DateTime.UtcNow.AddSeconds(SecondsBetweenChecks);
-            
-            using (var scope = this.serviceScopeFactory.CreateScope())
+            try
             {
-                var dbContext = scope.ServiceProvider.GetRequiredService<SchedulesContext>();
-                var schedules = await dbContext.Schedules.ToListAsync(cancellationToken: cancellationToken);
-                
-                var scheduleTasks = new List<Task>();
+                this.logger.LogInformation("Running schedule check");
 
-                foreach (var schedule in schedules)
+                var nextCheckAt = DateTime.UtcNow.AddSeconds(SecondsBetweenChecks);
+
+                using (var scope = this.serviceScopeFactory.CreateScope())
                 {
-                    var cronExpression = Cronos.CronExpression.Parse(schedule.ScheduleExpression);
-                    var lastRun = schedule.LastRunUtc ?? DateTime.UtcNow;
-                    var occurrences = 
-                        cronExpression.GetOccurrences(lastRun, nextCheckAt, TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZone))
-                            .Where(_ => !publicHolidays.IsPublicHoliday(_, schedule.HolidayCalendar))
-                            .ToList();
+                    var dbContext = scope.ServiceProvider.GetRequiredService<SchedulesContext>();
+                    var schedules = await dbContext.Schedules.ToListAsync(cancellationToken: cancellationToken);
 
-                    this.logger.LogInformation($"{occurrences.Count} occurrences due in the next {SecondsBetweenChecks} seconds for schedule '{schedule.Name}'");
+                    var scheduleTasks = new List<Task>();
 
-                    var historicRunCompleted = false;
-                    
-                    foreach (var occurrence in occurrences)
+                    foreach (var schedule in schedules)
                     {
-                        var isHistoric = occurrence < DateTime.UtcNow;
+                        var cronExpression = Cronos.CronExpression.Parse(schedule.ScheduleExpression);
+                        var lastRun = schedule.LastRunUtc ?? DateTime.UtcNow;
+                        var occurrences =
+                            cronExpression.GetOccurrences(lastRun, nextCheckAt,
+                                    TimeZoneInfo.FindSystemTimeZoneById(schedule.TimeZone))
+                                .Where(_ => !publicHolidays.IsPublicHoliday(_, schedule.HolidayCalendar))
+                                .ToList();
 
-                        // Only trigger one historic occurence
-                        if (isHistoric && historicRunCompleted)
+                        this.logger.LogInformation(
+                            $"{occurrences.Count} occurrences due in the next {SecondsBetweenChecks} seconds for schedule '{schedule.Name}'");
+
+                        var historicRunCompleted = false;
+
+                        foreach (var occurrence in occurrences)
                         {
-                            continue;
-                        }
-                        
-                        var dueSchedule = new DueSchedule
-                        {
-                            Schedule = schedule,
-                            WhenDue = occurrence,
-                        };
-                        
-                        scheduleTasks.Add(Task.Run(async () =>
-                        {
-                            var delay = TimeSpan.Zero;
-                            if (!isHistoric)
+                            var isHistoric = occurrence < DateTime.UtcNow;
+
+                            // Only trigger one historic occurence
+                            if (isHistoric && historicRunCompleted)
                             {
-                                delay = occurrence - DateTime.UtcNow;
+                                continue;
                             }
-                            this.logger.LogInformation($"Waiting {delay.TotalSeconds} seconds before triggering schedule '{schedule.Name}' @ {occurrence:O}");
-                            await Task.Delay(delay, cancellationToken);
-                            await OnScheduleDue(dueSchedule);
-                            schedule.LastRunUtc = DateTime.UtcNow;
-                            dbContext.Update(schedule);
-                            await dbContext.SaveChangesAsync(cancellationToken);
-                        }, cancellationToken));
-                        
-                        if (isHistoric)
-                        {
-                            historicRunCompleted = true;
+
+                            var dueSchedule = new DueSchedule
+                            {
+                                Schedule = schedule,
+                                WhenDue = occurrence,
+                            };
+
+                            scheduleTasks.Add(Task.Run(async () =>
+                            {
+                                var delay = TimeSpan.Zero;
+                                if (!isHistoric)
+                                {
+                                    delay = occurrence - DateTime.UtcNow;
+                                }
+
+                                this.logger.LogInformation(
+                                    $"Waiting {delay.TotalSeconds} seconds before triggering schedule '{schedule.Name}' @ {occurrence:O}");
+                                await Task.Delay(delay, cancellationToken);
+                                await OnScheduleDue(dueSchedule);
+                                schedule.LastRunUtc = DateTime.UtcNow;
+                                dbContext.Update(schedule);
+                                await dbContext.SaveChangesAsync(cancellationToken);
+                            }, cancellationToken));
+
+                            if (isHistoric)
+                            {
+                                historicRunCompleted = true;
+                            }
                         }
                     }
+
+                    await Task.WhenAll(scheduleTasks);
                 }
 
-                await Task.WhenAll(scheduleTasks);
+                // Wait until the next check is due
+                var timeUntilNextCheck = nextCheckAt - DateTime.UtcNow;
+                if (timeUntilNextCheck > TimeSpan.Zero)
+                {
+                    await Task.Delay(timeUntilNextCheck, cancellationToken);
+                }
             }
-
-            // Wait until the next check is due
-            var timeUntilNextCheck = nextCheckAt - DateTime.UtcNow;
-            if (timeUntilNextCheck > TimeSpan.Zero)
+            catch (Exception ex)
             {
-                await Task.Delay(timeUntilNextCheck, cancellationToken);
+                this.logger.LogError(ex, "Unexpected exception when performing schedule check");
+
+                // Wait 10 seconds before retrying
+                await Task.Delay(TimeSpan.FromSeconds(10), cancellationToken);
+
+                if (++exceptionCount > MaxExceptionsAllowed)
+                {
+                    this.logger.LogError("Too many exceptions thrown performing scheduled checks. Scheduling service stopping.");
+                    break;
+                }
             }
         }
     }
@@ -119,10 +143,5 @@ public class SchedulingService : IHostedService
         return Cronos.CronExpression.Parse(schedule.ScheduleExpression)
             .GetOccurrences(start, end)
             .FirstOrDefault();
-    }
-    
-    public async Task StopAsync(CancellationToken cancellationToken)
-    {
-        this.logger.LogInformation("Stopping scheduling service");
     }
 }

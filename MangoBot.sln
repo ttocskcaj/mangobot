@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{CA8067
 		.dockerignore = .dockerignore
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangoBot.Messaging", "MangoBot.Messaging\MangoBot.Messaging.csproj", "{E9E225AE-B041-4EB6-85D4-498CD9CB8CE5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -24,5 +26,9 @@ Global
 		{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E9E225AE-B041-4EB6-85D4-498CD9CB8CE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E9E225AE-B041-4EB6-85D4-498CD9CB8CE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E9E225AE-B041-4EB6-85D4-498CD9CB8CE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E9E225AE-B041-4EB6-85D4-498CD9CB8CE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
