@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangoBot.WebApp", "MangoBot.WebApp\MangoBot.WebApp.csproj", "{57DF9C8E-983B-46FC-9275-277E56187C4A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MangoBot.Infrastructure", "MangoBot.Infrastructure\MangoBot.Infrastructure.csproj", "{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docker", "Docker", "{CA80673F-8EF5-45A8-8E85-C8E70E6199BD}"
+	ProjectSection(SolutionItems) = preProject
+		Dockerfile = Dockerfile
+		.dockerignore = .dockerignore
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57DF9C8E-983B-46FC-9275-277E56187C4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57DF9C8E-983B-46FC-9275-277E56187C4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57DF9C8E-983B-46FC-9275-277E56187C4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57DF9C8E-983B-46FC-9275-277E56187C4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EAA88B7-CBA7-4AFF-8654-59F1D8D25196}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
