@@ -13,12 +13,14 @@ jobs:
           with:
             creds: ${{ secrets.AZURE_CREDENTIALS }}
         
-        - uses: azure/docker-login@v1
+        - name: 'Login via Azure Docker Registry'
+          uses: azure/docker-login@v1
           with:
             login-server: mangobotregistry2.azurecr.io
             username: ${{ secrets.REGISTRY_USERNAME }}
             password: ${{ secrets.REGISTRY_PASSWORD }}
-        - run: |
+        - name: 'Docker build and push'
+          run: |
             docker build . -t mangobotregistry2.azurecr.io/mangobot:${{ github.sha }}
             docker push mangobotregistry2.azurecr.io/mangobot:${{ github.sha }}
 
@@ -33,5 +35,5 @@ jobs:
             name: mangobot-aci
             location: 'east us'
             cpu: 1
-            memory: 0.1
+            memory: 1
             secure-environment-variables: ConnectionStrings__Cosmos=${{ secrets.COSMOS_CONNECTION_STRING }} Discord__Token=${{ secrets.DISCORD_TOKEN }}
