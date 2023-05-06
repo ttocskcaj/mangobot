@@ -1,5 +1,4 @@
 ﻿using Discord;
-using Discord.Rest;
 using Discord.WebSocket;
 using MangoBot.Infrastructure.Models;
 using Microsoft.Extensions.Logging;

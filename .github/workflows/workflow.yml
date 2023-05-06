@@ -36,4 +36,8 @@ jobs:
             location: 'east us'
             cpu: 1
             memory: 1
-            secure-environment-variables: ConnectionStrings__Cosmos=${{ secrets.COSMOS_CONNECTION_STRING }} Discord__Token=${{ secrets.DISCORD_TOKEN }}
+            secure-environment-variables: >
+              ConnectionStrings__Cosmos=${{ secrets.COSMOS_CONNECTION_STRING }} 
+              Discord__Token=${{ secrets.DISCORD_TOKEN }}
+              Discord__OpenAiKey=${{ secrets.OPEN_API_KEY }} 
+              Discord__PexelApiKey=${{ secrets.PEXEL_API_KEY }}
