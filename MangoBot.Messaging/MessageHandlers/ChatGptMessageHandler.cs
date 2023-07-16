@@ -62,7 +62,7 @@ public class ChatGptMessageHandler : INotificationHandler<MessageNotification>
     {
         var list = new List<string>
         {
-            "The most cringy cutesy uwu filled compliment addressed to Joe. Don't put it in quotes:",
+            $"The most cringy cutesy uwu filled compliment addressed to {author}. Don't put it in quotes:",
             $"An lame insult that a child would call someone. Addressed to {author}:",
         };
         
