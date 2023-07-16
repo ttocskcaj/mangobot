@@ -28,7 +28,7 @@ public class ChatGptMessageHandler : INotificationHandler<MessageNotification>
     {
         try
         {
-            var match = Regex.Match(notification.Message.CleanContent, "joe", RegexOptions.IgnoreCase);
+            var match = Regex.Match(notification.Message.CleanContent, "uwu", RegexOptions.IgnoreCase);
 
             if (!match.Success)
             {
