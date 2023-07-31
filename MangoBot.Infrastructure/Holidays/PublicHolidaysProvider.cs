@@ -14,6 +14,7 @@ public class PublicHolidaysProvider : IPublicHolidaysProvider
         return holidayCalendar switch
         {
             "NZ" => new NewZealandPublicHoliday(),
+            "AU" => new AustraliaPublicHoliday(),
             _ => throw new ArgumentOutOfRangeException($"Calendar '{holidayCalendar}' not implemented")
         };
     }
