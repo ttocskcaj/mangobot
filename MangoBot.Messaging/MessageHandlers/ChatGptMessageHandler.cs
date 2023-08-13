@@ -14,10 +14,10 @@ namespace MangoBot.Messaging.MessageHandlers;
 public class ChatGptMessageHandler : INotificationHandler<MessageNotification>
 {
     private readonly IDiscordClientProvider clientProvider;
-    private readonly ILogger<BgMessageHandler> logger;
+    private readonly ILogger<ChatGptMessageHandler> logger;
     private readonly IOptions<DiscordSettings> settings;
 
-    public ChatGptMessageHandler(IDiscordClientProvider clientProvider, ILogger<BgMessageHandler> logger, IOptions<DiscordSettings> settings)
+    public ChatGptMessageHandler(IDiscordClientProvider clientProvider, ILogger<ChatGptMessageHandler> logger, IOptions<DiscordSettings> settings)
     {
         this.clientProvider = clientProvider;
         this.logger = logger;
@@ -38,14 +38,14 @@ public class ChatGptMessageHandler : INotificationHandler<MessageNotification>
 
             this.logger.LogDebug("ChatGptMessageHandler handling: {content}", notification.Message.CleanContent);
 
-            var client = await clientProvider.GetClient();
+            var client = await this.clientProvider.GetClient();
             var channel = await client.Rest.GetChannelAsync(notification.Message.Channel.Id) as ITextChannel;
 
             
             var api = new OpenAI_API.OpenAIAPI(settings.Value.OpenAiKey);
             var message = new StringBuilder();
             
-            await foreach (var token in api.Completions.StreamCompletionEnumerableAsync(new CompletionRequest(this.GetPrompt(notification.Message.Author.Username), Model.DavinciText, 1000, 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1)).WithCancellation(cancellationToken))
+            await foreach (var token in api.Completions.StreamCompletionEnumerableAsync(new CompletionRequest(this.GetPrompt(notification.Message.Author.Username), Model.GPT4, 1000, 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1)).WithCancellation(cancellationToken))
             {
                 message.Append(token);
             }

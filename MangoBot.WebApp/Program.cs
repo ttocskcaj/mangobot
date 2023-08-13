@@ -35,6 +35,7 @@ try
     
     builder.Services.AddHostedService<SchedulingService>();
     builder.Services.AddHostedService<MessagingService>();
+    builder.Services.AddHostedService<BoredService>();
     
     builder.Host.UseSerilog(log);
     builder.Logging.ClearProviders();

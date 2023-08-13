@@ -5,6 +5,8 @@ using Microsoft.Extensions.Options;
 
 namespace MangoBot.Infrastructure.DiscordMessaging;
 
+using Discord.WebSocket;
+
 public class DiscordMessageSender : IMessageSender
 {
     private readonly IDiscordClientProvider discordClientProvider;
@@ -20,22 +22,60 @@ public class DiscordMessageSender : IMessageSender
         this.logger = logger;
         this.settings = settings.Value;
     }
-    
-    public async Task SendToChannel(Message message)
+
+    public async Task<RestGuild?> GetGuildByName(string guildName)
     {
         var client = await this.discordClientProvider.GetClient();
         var guilds = await client.Rest.GetGuildsAsync();
-        var guild = guilds.FirstOrDefault(_ => _.Name == this.settings.GuildName);
+        
+        return guilds.FirstOrDefault(_ => _.Name == guildName);
+    }
 
+    public async Task<RestTextChannel?> GetGuildChannelByName(RestGuild guild, string channelName)
+    {
+        var channels = await guild.GetTextChannelsAsync();
+        
+        return channels.FirstOrDefault(_ => _.Name == channelName);
+    }
+    
+    public async Task<RestTextChannel?> GetGuildChannelByName(string guildName, string channelName)
+    {
+        var guild = await this.GetGuildByName(this.settings.GuildName);
+        if (guild is null)
+        {
+            throw new Exception("Channel or guild not found");
+        }
+
+        return await this.GetGuildChannelByName(guild, channelName);
+    }
+
+    public async Task<IEnumerable<RestGuildUser>> GetGuildChannelMembers(string guildName, string channelName)
+    {
+        var channel = await this.GetGuildChannelByName(guildName, channelName);
+        if (channel is null)
+        {
+            throw new Exception("Channel not found");
+        }
+
+        var users = new List<RestGuildUser>();
+        await foreach (var page in channel.GetUsersAsync())
+        {
+            users.AddRange(page);
+        }
+
+        return users;
+    }
+
+    public async Task SendToChannel(Message message)
+    {
+        var guild = await this.GetGuildByName(this.settings.GuildName);
         if (guild is null)
         {
             this.logger.LogError("Could not send message. Guild '{GuildName}' not found", this.settings.GuildName);
             return;
         }
-        
-        var channels = await guild.GetTextChannelsAsync();
-        var channel = channels.FirstOrDefault(_ => _.Name == message.Channel);
 
+        var channel = await this.GetGuildChannelByName(guild, message.Channel);
         if (channel == null)
         {
             this.logger.LogError("Could not send message. Channel {Channel} not found", message.Channel);
