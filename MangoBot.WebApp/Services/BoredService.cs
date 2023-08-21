@@ -17,7 +17,7 @@ public class BoredService : IHostedService
     private readonly ILogger<BoredService> logger;
     private readonly IOptions<DiscordSettings> settings;
     private static int minutesBetweenChecks = 10;
-    private static int minutesToBoredom = 120;
+    private static int minutesToBoredom = 30;
 
     private static TimeOnly startTime = new(09,00);
     private static TimeOnly endTime = new(22,00);
