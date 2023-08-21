@@ -239,6 +239,9 @@ public class BoredService : IHostedService
             $"A haiku about {GetRandomTopic()}:",
             $"A conversation starter about {GetRandomTopic()}. Don't put it in quotes:",
             $"A poem about {GetRandomTopic()} with {targets[0]} and {targets[1]}:",
+            "A random salesforce code sample for Joe to review:",
+            "A controversial anime take:",
+            $"A joke about {GetRandomTopic()}:",
         };
         
         var random = new Random();
