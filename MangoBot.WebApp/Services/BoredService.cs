@@ -17,7 +17,7 @@ public class BoredService : IHostedService
     private readonly ILogger<BoredService> logger;
     private readonly IOptions<DiscordSettings> settings;
     private static int minutesBetweenChecks = 10;
-    private static int minutesToBoredom = 30;
+    private static int minutesToBoredom = 120;
 
     private static TimeOnly startTime = new(09,00);
     private static TimeOnly endTime = new(22,00);
@@ -234,12 +234,12 @@ public class BoredService : IHostedService
     {
         var list = new List<string>
         {
-            $"A pickup line that a robot might use. Addressed to {targets.First()}:",
-            $"An interesting fact about {GetRandomTopic()}:",
+            //$"A pickup line that a robot might use. Addressed to {targets.First()}:",
+            //$"An interesting fact about {GetRandomTopic()}:",
             $"A haiku about {GetRandomTopic()}:",
-            $"A conversation starter about {GetRandomTopic()}. Don't put it in quotes:",
+            //$"A conversation starter about {GetRandomTopic()}. Don't put it in quotes:",
             $"A poem about {GetRandomTopic()} with {targets[0]} and {targets[1]}:",
-            "A random salesforce code sample for Joe to review:",
+            "A random salesforce code sample for Joe to review. Explain what the code does:",
             "A controversial anime take:",
             $"A joke about {GetRandomTopic()}:",
         };
