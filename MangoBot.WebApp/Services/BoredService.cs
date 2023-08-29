@@ -236,12 +236,12 @@ public class BoredService : IHostedService
         {
             //$"A pickup line that a robot might use. Addressed to {targets.First()}:",
             //$"An interesting fact about {GetRandomTopic()}:",
-            $"A haiku about {GetRandomTopic()}:",
+            $"A haiku about Death Note:",
             //$"A conversation starter about {GetRandomTopic()}. Don't put it in quotes:",
-            $"A poem about {GetRandomTopic()} with {targets[0]} and {targets[1]}:",
-            "A random salesforce code sample for Joe to review. Explain what the code does:",
-            "A controversial anime take:",
-            $"A joke about {GetRandomTopic()}:",
+            $"A poem about Death Note with {targets[0]} and {targets[1]}:",
+            "A hot-take about Death Note:",
+            $"A joke about Death Note:",
+            $"My favourite scene from Death Note:",
         };
         
         var random = new Random();
